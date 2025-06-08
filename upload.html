@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload DICOM Image</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='uploadstyles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Upload a DICOM File</h2>
+        <p>📂 Only <strong>.dcm</strong> files (DICOM File RA64) are allowed.</p>
+
+        <div id="drop-area">
+            <p>Drag & Drop your file here or click to select.</p>
+        </div>
+
+        <form id="uploadForm" action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+            <input type="file" id="fileInput" name="file" accept=".dcm" hidden required>
+            <label for="fileInput" class="file-upload-label">Choose File</label>
+            <span id="fileNameDisplay" class="file-info"></span>
+            <button type="submit" id="uploadBtn" disabled>Upload</button>
+        </form>
+
+        <p id="error-message" style="color: red; display: none;">❌ Invalid file type. Please upload a <strong>DICOM .dcm</strong> file.</p>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const fileInput = document.getElementById("fileInput");
+            const dropArea = document.getElementById("drop-area");
+            const uploadForm = document.getElementById("uploadForm");
+            const uploadBtn = document.getElementById("uploadBtn");
+            const errorMessage = document.getElementById("error-message");
+            const fileNameDisplay = document.getElementById("fileNameDisplay");
+
+            fileInput.addEventListener("change", function(event) {
+                handleFiles(event.target.files);
+            });
+
+            dropArea.addEventListener("dragover", function(event) {
+                event.preventDefault();
+                dropArea.classList.add("dragover");
+            });
+
+            dropArea.addEventListener("dragleave", function(event) {
+                dropArea.classList.remove("dragover");
+            });
+
+            dropArea.addEventListener("drop", function(event) {
+                event.preventDefault();
+                dropArea.classList.remove("dragover");
+                handleFiles(event.dataTransfer.files);
+            });
+
+            function handleFiles(files) {
+                const file = files[0];
+                if (!file) return;
+
+                if (!file.name.toLowerCase().endsWith(".dcm")) {
+                    errorMessage.style.display = "block";
+                    fileInput.value = "";
+                    fileNameDisplay.textContent = "";
+                    uploadBtn.disabled = true;
+                    alert("❌ Invalid file type. Please upload a DICOM (.dcm) file.");
+                    return;
+                }
+                errorMessage.style.display = "none";
+                fileNameDisplay.textContent = `📄 ${file.name}`;
+                uploadBtn.disabled = false;
+            }
+
+            uploadForm.addEventListener("submit", function(event) {
+                uploadBtn.disabled = true;
+                alert("✅ File uploaded successfully! Processing...");
+            });
+        });
+    </script>
+</body>
+</html>
